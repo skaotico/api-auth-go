@@ -48,7 +48,7 @@ El proyecto sigue una estructura modular de Go, alineada con la Arquitectura Lim
 ### 1. Clonar el Repositorio
 
 ```bash
-git clone [URL_DE_TU_REPOSITORIO]
+git clone https://github.com/skaotico/api-auth-go
 cd api-auth
 ```
 
