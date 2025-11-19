@@ -13,6 +13,7 @@ import (
 	service "api-auth/internal/service/auth"
 	loginServiceDto "api-auth/internal/service/auth/dto"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -54,8 +55,8 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		// Guardamos error en response y dejamos que el middleware lo formatee
 		c.Set("response_error", map[string]interface{}{
 			"message":   err.Error(),
-			"errorCode": "BAD_REQUEST",
-			"httpCode":  http.StatusBadRequest,
+			"errorCode": strconv.Itoa(http.StatusBadGateway),
+			"httpCode":  http.StatusBadGateway,
 		})
 		c.Abort()
 		return
@@ -70,8 +71,8 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	if err != nil {
 		c.Set("response_error", map[string]interface{}{
 			"message":   err.Error(),
-			"errorCode": "UNAUTHORIZED",
-			"httpCode":  http.StatusUnauthorized,
+			"errorCode": strconv.Itoa(http.StatusInternalServerError),
+			"httpCode":  http.StatusInternalServerError,
 		})
 		c.Abort()
 		return
