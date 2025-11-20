@@ -52,7 +52,6 @@ func NewApp(logger *zap.Logger, configEnv *envPrimitivos.Config) *App {
 
 	// Swagger
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
 	// -------------------------------
 	// Inyección de dependencias
 	// -------------------------------
