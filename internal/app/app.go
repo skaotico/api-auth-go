@@ -45,6 +45,7 @@ type App struct {
 //	*App: Puntero a la instancia de la aplicación inicializada.
 func NewApp(logger *zap.Logger, configEnv *envPrimitivos.Config) *App {
 	router := gin.New()
+	sdsdsd
 	router.Use(gin.Recovery())
 	router.Use(logging.GinZap(logger))
 	router.Use(response.MiddlewareResponse())
