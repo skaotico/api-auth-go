@@ -1,3 +1,11 @@
+// ============================================================
+// @file: handler.go
+// @author: Yosemar Andrade
+// @created: 2025-11-20
+// @description: Handler para la gestión de usuarios.
+// ============================================================
+
+// Package user contiene los handlers para la gestión de usuarios.
 package user
 
 import (
@@ -5,21 +13,39 @@ import (
 
 	domain "api-auth/internal/domain/user"
 	request "api-auth/internal/handler/user/dto/request"
-	service "api-auth/internal/service/user"
+	userService "api-auth/internal/service/user"
 
 	"github.com/gin-gonic/gin"
 )
 
-type UserHandler struct {
-	service service.UserServiceInterface
+// Handler representa el controlador encargado de manejar las solicitudes relacionadas con usuarios.
+type Handler struct {
+	service userService.ServiceInterface
 }
 
-// NewUserHandler constructor
-func NewUserHandler(s service.UserServiceInterface) *UserHandler {
-	return &UserHandler{service: s}
+// NewHandler crea una nueva instancia de Handler.
+//
+// Parámetros:
+//
+//	s: Implementación de ServiceInterface.
+//
+// Retorna:
+//
+//	*Handler: Instancia inicializada.
+func NewHandler(s userService.ServiceInterface) *Handler {
+	return &Handler{service: s}
 }
 
-func (h *UserHandler) GetUsers(c *gin.Context) {
+// GetUsers obtiene la lista de usuarios.
+//
+// @Summary Obtener usuarios
+// @Description Obtiene todos los usuarios registrados.
+// @Tags User
+// @Produce json
+// @Success 200 {array} domain.User
+// @Failure 500 {object} map[string]string
+// @Router /v1/users [get]
+func (h *Handler) GetUsers(c *gin.Context) {
 	users, err := h.service.GetAllUsers()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -28,7 +54,19 @@ func (h *UserHandler) GetUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, users)
 }
 
-func (h *UserHandler) CreateUser(c *gin.Context) {
+// CreateUser crea un nuevo usuario.
+//
+// @Summary Crear usuario
+// @Description Crea un nuevo usuario en el sistema.
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param request body request.CreateUserRequest true "Datos del usuario"
+// @Success 201 {object} domain.User
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /v1/users [post]
+func (h *Handler) CreateUser(c *gin.Context) {
 	var req request.CreateUserRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {

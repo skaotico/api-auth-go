@@ -1,13 +1,11 @@
 // ============================================================
 // @file: main.go
 // @author: Yosemar Andrade
-// @date: 2025-11-19
-// @lastModified: 2025-11-19
-// @description: Punto de entrada del servicio de autenticación. Se encarga de
-// inicializar el logger, cargar la configuración, establecer conexión a la base
-// de datos y levantar el servidor HTTP.
+// @created: 2025-11-20
+// @description: Punto de entrada del servicio de autenticación. Se encarga de inicializar el logger, cargar la configuración, establecer conexión a la base de datos y levantar el servidor HTTP.
 // ============================================================
 
+// Package main provee el punto de entrada del servicio de autenticación.
 package main
 
 import (
@@ -16,6 +14,7 @@ import (
 	"api-auth/pkg/config/env"
 	"api-auth/pkg/logger"
 	config "api-auth/pkg/platform/bd"
+	"fmt"
 
 	domain "api-auth/internal/domain/user"
 
@@ -28,7 +27,7 @@ import (
 )
 
 var _ = request.CreateUserRequest{}
-var _ = userHandler.NewUserHandler
+var _ = userHandler.NewHandler
 var _ = userRespServDto.UserServiceResponseDto{}
 var _ = domain.User{}
 var _ = reqAut.LoginRequestDto{}
@@ -60,7 +59,12 @@ var _ = reqAut.LoginRequestDto{}
 func main() {
 	// Inicializar logger
 	logger.Init()
-	defer logger.Log.Sync()
+	defer func() {
+		if err := logger.Log.Sync(); err != nil {
+			// registrar el error o ignorarlo de forma consciente
+			fmt.Printf("error syncing logger: %v\n", err)
+		}
+	}()
 
 	// Cargar configuración desde variables de entorno
 	appConfig := env.Load()

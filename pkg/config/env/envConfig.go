@@ -1,14 +1,11 @@
 // ============================================================
-// @file: env.go
+// @file: envConfig.go
 // @author: Yosemar Andrade
-// @date: 2025-11-19
-// @lastModified: 2025-11-19
-// @description: Módulo responsable de cargar, validar y mapear
-// variables de entorno en la estructura de configuración del
-// proyecto, priorizando variables del sistema y aplicando reglas
-// de obligatoriedad mediante envconfig.
+// @created: 2025-11-20
+// @description: Módulo responsable de cargar, validar y mapear variables de entorno.
 // ============================================================
 
+// Package env gestiona la carga de variables de entorno.
 package env
 
 import (

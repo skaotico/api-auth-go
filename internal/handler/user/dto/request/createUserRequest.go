@@ -1,7 +1,16 @@
+// ============================================================
+// @file: createUserRequest.go
+// @author: Yosemar Andrade
+// @created: 2025-11-20
+// @description: DTO para la creación de usuarios.
+// ============================================================
+
+// Package request contiene los DTOs de solicitud para el handler de usuarios.
 package request
 
 import "time"
 
+// CreateUserRequest representa los datos necesarios para crear un usuario.
 type CreateUserRequest struct {
 	Username    string     `json:"username" binding:"required" example:"yandrade"`
 	FirstName   string     `json:"first_name" example:"Yosemar"`

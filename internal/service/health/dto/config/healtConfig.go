@@ -1,11 +1,11 @@
 // ============================================================
-// @file: health_config.go
+// @file: healtConfig.go
 // @author: Yosemar Andrade
-// @date: 2025-11-19
-// @lastModified: 2025-11-19
+// @created: 2025-11-20
 // @description: Define la configuración de estado de salud del servicio.
 // ============================================================
 
+// Package config contiene las estructuras de configuración para el servicio de salud.
 package config
 
 // HealthConfig representa la información de estado de salud de un servicio.

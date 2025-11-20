@@ -1,3 +1,11 @@
+// ============================================================
+// @file: router.go
+// @author: Yosemar Andrade
+// @created: 2025-11-20
+// @description: Configuración de rutas y servidor HTTP.
+// ============================================================
+
+// Package handler define la estructura de enrutamiento y configuración del servidor.
 package handler
 
 import (
@@ -10,6 +18,10 @@ type Router struct {
 }
 
 // NewRouter crea una nueva instancia de Router y configura el motor de Gin.
+//
+// Retorna:
+//
+//	*Router: Instancia de Router inicializada.
 func NewRouter() *Router {
 	r := gin.Default()
 	return &Router{
@@ -31,6 +43,14 @@ func (r *Router) SetupRoutes() {
 }
 
 // Run inicia el servidor HTTP en el puerto especificado.
+//
+// Parámetros:
+//
+//	addr: Dirección y puerto en el que escuchará el servidor.
+//
+// Retorna:
+//
+//	error: Error si falla el inicio del servidor.
 func (r *Router) Run(addr string) error {
 	return r.Engine.Run(addr)
 }

@@ -1,8 +1,15 @@
+// ============================================================
+// @file: app.go
+// @author: Yosemar Andrade
+// @created: 2025-11-20
+// @description: Define la estructura y configuración principal de la aplicación.
+// ============================================================
+
+// Package app provee la configuración y arranque de la aplicación.
 package app
 
 import (
 	authHandler "api-auth/internal/handler/auth"
-	userHandler "api-auth/internal/handler/user"
 	"api-auth/internal/middleware/logging"
 	"api-auth/internal/middleware/response"
 	authRepository "api-auth/internal/repository/auth"
@@ -20,18 +27,27 @@ import (
 	"go.uber.org/zap"
 )
 
-// App representa la aplicación principal
+// App representa la aplicación principal.
 type App struct {
 	Router *gin.Engine
 	log    *zap.Logger
 }
 
-// NewApp inicializa la app con router, middlewares y dependencias
+// NewApp inicializa la app con router, middlewares y dependencias.
+//
+// Parámetros:
+//
+//	logger: Instancia de zap.Logger para logging.
+//	configEnv: Configuración de variables de entorno.
+//
+// Retorna:
+//
+//	*App: Puntero a la instancia de la aplicación inicializada.
 func NewApp(logger *zap.Logger, configEnv *envPrimitivos.Config) *App {
 	router := gin.New()
 	router.Use(gin.Recovery())
 	router.Use(logging.GinZap(logger))
-	router.Use(response.ResponseMiddleware())
+	router.Use(response.MiddlewareResponse())
 
 	// Swagger
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -41,12 +57,12 @@ func NewApp(logger *zap.Logger, configEnv *envPrimitivos.Config) *App {
 	// -------------------------------
 
 	// USER
-	repoUser := userRepository.NewUserRepository()
+	repoUser := userRepository.NewRepository()
 	serviceUser := userService.NewUserService(repoUser)
 	// handlerUser := userHandler.NewUserHandler(serviceUser)
 
 	// AUTH
-	authRepo := authRepository.NewAuthRepository()
+	authRepo := authRepository.NewRepository()
 
 	envJwtConfig := jwtConfig.JWTConfig{
 		Secret:     configEnv.JWTSecret,
@@ -60,7 +76,7 @@ func NewApp(logger *zap.Logger, configEnv *envPrimitivos.Config) *App {
 	// -------------------------------
 	// Setup de rutas
 	// -------------------------------
-	setupV1Routes(router, nil, handlerAuth, configEnv.Version, configEnv.Environment)
+	setupV1Routes(router, handlerAuth, configEnv.Version, configEnv.Environment)
 
 	return &App{
 		Router: router,
@@ -68,8 +84,15 @@ func NewApp(logger *zap.Logger, configEnv *envPrimitivos.Config) *App {
 	}
 }
 
-// setupV1Routes registra todas las rutas de la versión 1
-func setupV1Routes(router *gin.Engine, userHandler *userHandler.UserHandler, authHandler *authHandler.AuthHandler, version string, environment string) {
+// setupV1Routes registra todas las rutas de la versión 1.
+//
+// Parámetros:
+//
+//	router: Motor de Gin.
+//	authHandler: Handler de autenticación.
+//	version: Versión de la aplicación.
+//	environment: Entorno de ejecución.
+func setupV1Routes(router *gin.Engine, authHandler *authHandler.Handler, version string, environment string) {
 	v1 := router.Group("/v1")
 	{
 		dbStatus := "OK"
@@ -98,7 +121,15 @@ func setupV1Routes(router *gin.Engine, userHandler *userHandler.UserHandler, aut
 	}
 }
 
-// Run inicia el servidor en el puerto especificado
+// Run inicia el servidor en el puerto especificado.
+//
+// Parámetros:
+//
+//	port: Puerto en el que escuchará el servidor (ej: ":8080").
+//
+// Retorna:
+//
+//	error: Error si falla el inicio del servidor.
 func (a *App) Run(port string) error {
 	return a.Router.Run(port)
 }

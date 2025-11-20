@@ -1,16 +1,16 @@
 // ============================================================
-// @file: auth_handler.go
+// @file: handler.go
 // @author: Yosemar Andrade
-// @date: 2025-11-18
-// @lastModified: 2025-11-18
+// @created: 2025-11-20
 // @description: Handler para autenticación de usuarios.
 // ============================================================
 
+// Package auth contiene los handlers para la autenticación.
 package auth
 
 import (
 	"api-auth/internal/handler/auth/dto/request"
-	service "api-auth/internal/service/auth"
+	authService "api-auth/internal/service/auth"
 	loginServiceDto "api-auth/internal/service/auth/dto"
 	"net/http"
 	"strconv"
@@ -18,10 +18,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// AuthHandler representa el controlador encargado de manejar
+// Handler representa el controlador encargado de manejar
 // las solicitudes relacionadas con autenticación.
-type AuthHandler struct {
-	service service.AuthServiceInterface
+type Handler struct {
+	service authService.ServiceInterface
 }
 
 // NewAuthHandler crea una nueva instancia de AuthHandler.
@@ -34,8 +34,8 @@ type AuthHandler struct {
 //
 // Errores:
 //   - No aplica.
-func NewAuthHandler(s service.AuthServiceInterface) *AuthHandler {
-	return &AuthHandler{service: s}
+func NewAuthHandler(s authService.ServiceInterface) *Handler {
+	return &Handler{service: s}
 }
 
 // Login maneja el proceso de autenticación
@@ -48,7 +48,7 @@ func NewAuthHandler(s service.AuthServiceInterface) *AuthHandler {
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /v1/auth/login [post]
-func (h *AuthHandler) Login(c *gin.Context) {
+func (h *Handler) Login(c *gin.Context) {
 	var req request.LoginRequestDto
 
 	if err := c.ShouldBindJSON(&req); err != nil {
