@@ -1,101 +1,105 @@
-# api-auth: Servicio de Autenticación Centralizada
+# 🔐 api-auth: Servicio de Autenticación Centralizada
 
-## Descripción
+![Go Version](https://img.shields.io/badge/Go-1.25.4-blue?style=for-the-badge&logo=go)
+![Gin Framework](https://img.shields.io/badge/Gin-v1.11.0-00ADD8?style=for-the-badge&logo=go&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
-`api-auth` es un servicio de micro-autenticación desarrollado en **Go** (1.25.4) utilizando el framework **Gin**. Su propósito principal es centralizar la gestión de usuarios y la generación de tokens de acceso seguros.
+## 📋 Descripción
 
-Actualmente, expone un endpoint (`/login`) para autenticar usuarios mediante correo electrónico y contraseña. Genera un **JSON Web Token (JWT)** válido, permitiendo el acceso a otros microservicios.
+**api-auth** es un servicio de micro-autenticación robusto y eficiente desarrollado en **Go** utilizando el framework **Gin**. Su misión es centralizar la gestión de usuarios y la emisión segura de tokens de acceso, sirviendo como la puerta de entrada confiable para tu ecosistema de microservicios.
 
-### Características
+Actualmente, el servicio expone un endpoint principal (`/login`) que autentica usuarios vía credenciales (email/password) y genera un **JSON Web Token (JWT)** firmado, habilitando el acceso seguro a otros recursos protegidos.
 
-- Autenticación segura mediante **bcrypt** para el almacenamiento de contraseñas.
-- Generación de **JWT** para la gestión de sesiones.
-- Diseño modular y de capas (Clean Architecture) para facilitar el mantenimiento y la escalabilidad.
-- Documentación automática con Swagger.
+### ✨ Características Principales
 
-## Tecnologías Principales
+- **🔒 Autenticación Robusta**: Implementación de **bcrypt** para el hashing y salting seguro de contraseñas.
+- **🔑 Gestión de Sesiones JWT**: Generación y firma de tokens estándar para autenticación stateless.
+- **🏗️ Arquitectura Limpia**: Diseño modular basado en Clean Architecture para máxima mantenibilidad y testabilidad.
+- **📄 Documentación Viva**: Integración con Swagger para documentación automática de la API.
+- **🐳 Docker Ready**: Contenerización lista para despliegue con Docker.
+- **✅ Calidad de Código**: Linter integrado (golangci-lint) y hooks de pre-commit para asegurar estándares.
 
-| Tecnología    | Versión              | Descripción                                |
-|:------------- |:-------------------- |:------------------------------------------ |
-| Go            | 1.25.4               | Lenguaje de programación principal         |
-| Gin           | v1.11.0              | Framework web rápido y minimalista para Go |
-| JWT           | golang-jwt/jwt/v5    | Implementación de JWT para Go              |
-| PostgreSQL    | lib/pq               | Driver para conexión a PostgreSQL          |
-| Configuración | Variables de entorno | Carga de variables con `joho/godotenv`     |
+---
 
-## Estructura del Proyecto
+## 🛠️ Tecnologías
 
-El proyecto sigue una estructura modular de Go, alineada con la Arquitectura Limpia/Hexagonal:
+| Tecnología | Versión | Descripción |
+| :--- | :--- | :--- |
+| **Go** | `1.25.4` | Lenguaje principal, concurrente y tipado. |
+| **Gin** | `v1.11.0` | Framework HTTP de alto rendimiento. |
+| **JWT** | `v5` | Estándar para transmisión segura de información. |
+| **PostgreSQL** | `lib/pq` | Motor de base de datos relacional. |
+| **Godotenv** | `v1` | Gestión de configuración via `.env`. |
 
+---
+
+## 📂 Estructura del Proyecto
+
+El proyecto sigue una estructura idiomática de Go, separando responsabilidades claramente:
+
+```bash
+├── cmd/
+│   └── server/          # 🚀 Punto de entrada (main.go)
+├── internal/            # 🧠 Lógica de negocio privada
+│   ├── domain/          # Modelos y contratos (Interfaces)
+│   ├── service/         # Casos de uso y lógica de aplicación
+│   ├── repository/      # Acceso a datos (SQL implementation)
+│   └── handler/         # Controladores HTTP (Gin handlers)
+└── pkg/                 # 📦 Paquetes reutilizables (Logger, DB, JWT)
 ```
-├── cmd/server           # Punto de entrada para iniciar el servidor
-├── internal/            # Lógica de aplicación privada (core del negocio)
-│   ├── domain           # Entidades y reglas de negocio
-│   ├── service          # Lógica de aplicación
-│   ├── repository       # Capa de persistencia (acceso a DB)
-│   └── handler          # Capa de presentación (controladores HTTP Gin)
-└── pkg/                 # Código reutilizable (configuración, logging, JWT, DB)
-```
 
-## Instalación y Ejecución
+---
+
+## 🚀 Instalación y Ejecución
 
 ### Requisitos Previos
-
-1. Go 1.25.4 o superior  
-2. Git  
-3. Base de Datos PostgreSQL  
+- **Go** 1.25.4+
+- **Git**
+- **PostgreSQL** (Local o Docker)
 
 ### 1. Clonar el Repositorio
-
 ```bash
 git clone https://github.com/skaotico/api-auth-go
 cd api-auth
 ```
 
 ### 2. Configuración de Entorno
-
-Cree un archivo `.env` en la raíz del proyecto con la configuración necesaria:
+Crea un archivo `.env` en la raíz basado en el siguiente template:
 
 ```env
-# ===========================
-# Ambiente de la Aplicación
-# ===========================
-ENV=
-APP_PORT=
-VERSION=
+# --- APP ---
+ENV=development
+APP_PORT=8080
+VERSION=1.0.0
 
-# ===========================
-# Configuración de Base de Datos
-# ===========================
-DB_HOST=
-DB_USER=
-DB_PASS=
-DB_NAME=
+# --- DATABASE ---
+DB_HOST=localhost
+DB_USER=postgres
+DB_PASS=tu_password
+DB_NAME=auth_db
 
-# ===========================
-# Configuración JWT
-# ===========================
-# La clave debe ser larga, compleja y única para proteger tus tokens.
-JWT_SECRET=
-JWT_EXPIRATION=
-JWT_REFRESH_TTL=
+# --- SECURITY (JWT) --- 
+# ⚠️ Usa una clave secreta fuerte en producción
+JWT_SECRET=super_secret_key_change_me
+JWT_EXPIRATION=24h
+JWT_REFRESH_TTL=72h
 ```
 
 ### 3. Instalar Dependencias
-
 ```bash
 go mod tidy
 ```
 
 ### 4. Ejecutar el Servidor
-
 ```bash
 go run ./cmd/server
 ```
+> El servicio estará disponible en: `http://localhost:8080`
 
-El servicio se iniciará y estará disponible en `http://localhost:<env.APP_PORT>`.
+---
 
-## Dockerización
+## 🐳 Dockerización
 
 Para facilitar la ejecución del servicio y su despliegue, `api-auth` puede ejecutarse dentro de un contenedor Docker.
 
@@ -120,17 +124,15 @@ docker run -d -p 8022:8022 --name api-auth-go api-auth-go:latest
 ```
 
 ya con esto tendrias levantado el proyecto en docker 
+ 
 
-## API Endpoints
+## 📡 API Endpoints
 
-### Autenticación (Login)
+### `POST /v1/auth/login`
 
-- **Método:** POST  
-- **Endpoint:** `/v1/auth/login`  
-- **Descripción:** Autentica a un usuario y devuelve un token JWT.
+Autentica un usuario y devuelve sus credenciales de acceso.
 
-#### Ejemplo de Solicitud (Request Body)
-
+**Request Body:**
 ```json
 {
   "email": "user@example.com",
@@ -138,58 +140,70 @@ ya con esto tendrias levantado el proyecto en docker
 }
 ```
 
-#### Ejemplo de Respuesta Exitosa (200 OK)
-
+**Response (200 OK):**
 ```json
 {
   "success": true,
   "data": {
-    "id": 0,
+    "id": 1,
     "username": "usuario_ejemplo",
-    "email": "correo_ejemplo@dominio.com",
-    "first_name": "Nombre",
-    "last_name": "Apellido",
-    "phone": "+56900000000",
-    "country_id": 0,
-    "address_line": "Dirección de ejemplo 123",
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ejemploTokenDeJWT"
+    "email": "correo@dominio.com",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
   },
   "message": "Operación exitosa",
-  "timestamp": "YYYY-MM-DDTHH:MM:SS-03:00",
-  "path": "/v1/auth/login"
+  "timestamp": "2025-11-20T10:00:00-03:00"
 }
 ```
 
-#### Ejemplo de error (500 NOT-OK)
-
+**Response (Error):**
 ```json
 {
   "success": false,
-  "message": "usuario no encontrado",
-  "timestamp": "2025-11-19T17:23:12-03:00",
-  "path": "/v1/auth/login",
+  "message": "Credenciales inválidas",
   "error_code": "UNAUTHORIZED"
 }
 ```
 
-#### Ejemplo de error (502 NOT-OK)
+---
 
-```json
-{
-  "success": false,
-  "message": "Key: 'LoginRequestDto.Password' Error:Field validation for 'Password' failed on the 'required' tag",
-  "timestamp": "2025-11-19T17:32:29-03:00",
-  "path": "/v1/auth/login",
-  "error_code": "502"
-}
+## 🛡️ Calidad de Código
+
+Este proyecto utiliza **golangci-lint** para mantener un código limpio.
+
+### Ejecutar Linter Localmente
+```bash
+golangci-lint run
 ```
 
-## Contribución
+### Configurar Pre-commit Hook
+Evita commits con errores configurando el hook de git:
 
-1. Hacer un fork del repositorio.  
-2. Crear una nueva rama: `git checkout -b feature/nueva-funcionalidad`.  
-3. Realizar los cambios necesarios.  
-4. Asegurarse de que las pruebas pasen (si existen).  
-5. Hacer commit de los cambios: `git commit -am 'feat: Añadir nueva funcionalidad X'`.  
-6. Subir la rama: `git push origin feature/nueva-funcionalidad`.  
-7. Abrir un Pull Request (PR).
+```bash
+# Crear el hook
+echo '#!/bin/sh
+echo "🔍 Ejecutando linter..."
+golangci-lint run
+if [ $? -ne 0 ]; then
+  echo " Error de Lint! Corrige los errores antes de commitear."
+  exit 1
+fi
+echo " Lint pasado."
+exit 0' > .git/hooks/pre-commit
+
+# Dar permisos de ejecución
+chmod +x .git/hooks/pre-commit
+```
+
+---
+
+## 🤝 Contribución
+
+¡Las contribuciones son bienvenidas!
+
+1.  Haz un **Fork** del proyecto.
+2.  Crea tu rama de funcionalidad (`git checkout -b feature/AmazingFeature`).
+3.  Haz tus cambios y **Commit** (`git commit -m 'Add some AmazingFeature'`).
+4.  **Push** a la rama (`git push origin feature/AmazingFeature`).
+5.  Abre un **Pull Request**.
+
+ 
