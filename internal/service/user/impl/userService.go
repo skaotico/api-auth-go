@@ -1,13 +1,11 @@
 // ============================================================
-// @file: user_service.go
+// @file: userService.go
 // @author: Yosemar Andrade
-// @date: 2025-11-18
-// @lastModified: 2025-11-18
-// @description: Implementación del servicio de usuarios, encargado de
-// manejar la lógica de negocio relacionada con usuarios, incluyendo
-// creación, obtención, autenticación y validaciones.
+// @created: 2025-11-20
+// @description: Implementación del servicio de usuarios.
 // ============================================================
 
+// Package impl implementa la lógica de negocio del servicio de usuarios.
 package impl
 
 import (
@@ -15,8 +13,8 @@ import (
 	"log"
 
 	domain "api-auth/internal/domain/user"
-	repo "api-auth/internal/repository/user"
-	inter "api-auth/internal/service/user"
+	userRepo "api-auth/internal/repository/user"
+	userInterface "api-auth/internal/service/user"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -24,14 +22,14 @@ import (
 // UserService representa la implementación concreta del servicio de usuarios.
 // Este servicio encapsula las operaciones de negocio y delega persistencia al repositorio.
 type UserService struct {
-	repo repo.UserRepository
+	repo userRepo.Repository
 }
 
 // Verifica en tiempo de compilación que UserService implementa la interfaz UserServiceInterface.
-var _ inter.UserServiceInterface = (*UserService)(nil)
+var _ userInterface.ServiceInterface = (*UserService)(nil)
 
 // NewUserService crea una nueva instancia de UserService.
-func NewUserService(r repo.UserRepository) *UserService {
+func NewUserService(r userRepo.Repository) *UserService {
 	log.Printf("Inicializando UserService")
 	return &UserService{repo: r}
 }

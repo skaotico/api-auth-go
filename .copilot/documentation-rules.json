@@ -1,0 +1,103 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "description": "Insertar encabezado estándar en todos los archivos Go",
+      "scope": "file",
+      "match": [
+        "*.go"
+      ],
+      "actions": [
+        {
+          "type": "insertHeader",
+          "headerTemplate": "// ============================================================\n// @file: {{fileName}}\n// @author: Yosemar Andrade\n// @created: {{creationDate}}\n// @description: {{description}} (opcional)\n// ============================================================\n"
+        }
+      ]
+    },
+    {
+      "description": "Agregar comentario de paquete para evitar `package-comments` (revive)",
+      "scope": "file",
+      "match": [
+        "*.go"
+      ],
+      "actions": [
+        {
+          "type": "insertPackageComment",
+          "packageTemplate": "// Package {{packageName}} provee funcionalidades relacionadas con {{moduleDescription}}.\n"
+        }
+      ]
+    },
+    {
+      "description": "Generar documentación GoDoc para structs, funciones y métodos",
+      "scope": "symbol",
+      "match": [
+        "*.go"
+      ],
+      "actions": [
+        {
+          "type": "completionGuidance",
+          "style": {
+            "documentation": {
+              "language": "es-CL",
+              "format": "godoc",
+              "structTemplate": "// {{name}} representa {{description}}.\n",
+              "functionTemplate": "// {{name}} {{description}}.\n//\n// Parámetros:\n{{params}}\n// Retorna:\n{{returns}}{{#if errors}}\n// Errores:\n{{errors}}{{/if}}\n",
+              "methodTemplate": "// {{name}} {{description}}.\n//\n// Parámetros:\n{{params}}\n// Retorna:\n{{returns}}{{#if errors}}\n// Errores:\n{{errors}}{{/if}}\n"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "description": "Agregar documentación Swagger solo a handlers/controladores",
+      "scope": "file",
+      "match": [
+        "**/handler/**/*.go",
+        "**/controller/**/*.go",
+        "**/cmd/**/*.go"
+      ],
+      "actions": [
+        {
+          "type": "swaggerTags",
+          "templates": {
+            "operation": "// @Summary {{summary}}\n// @Description {{description}}\n// @Tags {{tag}}\n// @Accept json\n// @Produce json\n",
+            "param": "// @Param {{name}} {{location}} {{type}} {{required}} \"{{description}}\"",
+            "response": "// @Success {{code}} {object} {{model}}",
+            "errorResponse": "// @Failure {{code}} {object} {{errorModel}}",
+            "router": "// @Router {{path}} [{{method}}]"
+          }
+        }
+      ]
+    },
+    {
+      "description": "Evitar Swagger en capas internas (domain, service, repository)",
+      "scope": "file",
+      "match": [
+        "**/domain/**/*.go",
+        "**/service/**/*.go",
+        "**/repository/**/*.go"
+      ],
+      "actions": [
+        {
+          "type": "blockSwagger"
+        }
+      ]
+    },
+    {
+      "description": "Evitar GoDoc redundante en getters/setters triviales",
+      "scope": "symbol",
+      "match": [
+        "*.go"
+      ],
+      "actions": [
+        {
+          "type": "skipForTrivial",
+          "patterns": [
+            "Get.*",
+            "Set.*"
+          ]
+        }
+      ]
+    }
+  ]
+}

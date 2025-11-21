@@ -1,3 +1,11 @@
+// ============================================================
+// @file: postgres_repository.go
+// @author: Yosemar Andrade
+// @created: 2025-11-20
+// @description: Implementación de PostgreSQL para el repositorio de usuarios.
+// ============================================================
+
+// Package user contiene la implementación del repositorio de usuarios.
 package user
 
 import (
@@ -12,14 +20,27 @@ type postgresUserRepository struct {
 	db *sql.DB
 }
 
-// Constructor que devuelve un UserRepository
-func NewUserRepository() UserRepository {
+// NewRepository crea una nueva instancia de UserRepository con PostgreSQL.
+//
+// Retorna:
+//
+//	Repository: Instancia del repositorio.
+func NewRepository() Repository {
 	return &postgresUserRepository{
 		db: config.DB,
 	}
 }
 
-// Buscar usuario por email
+// FindByEmail busca un usuario por su correo electrónico.
+//
+// Parámetros:
+//
+//	email: Correo electrónico del usuario.
+//
+// Retorna:
+//
+//	*user.User: Usuario encontrado o nil.
+//	error: Error si ocurre un problema en la base de datos o el usuario no existe.
 func (r *postgresUserRepository) FindByEmail(email string) (*user.User, error) {
 	var userFind user.User
 
@@ -63,7 +84,7 @@ func (r *postgresUserRepository) FindByEmail(email string) (*user.User, error) {
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("user not found")
+			return nil, errors.New("usuario no encontrado")
 		}
 		return nil, err
 	}
@@ -71,7 +92,6 @@ func (r *postgresUserRepository) FindByEmail(email string) (*user.User, error) {
 	return &userFind, nil
 }
 
-// Listar todos los usuarios
 func (r *postgresUserRepository) FindAll() ([]*user.User, error) {
 	query := `
         SELECT 
@@ -95,7 +115,12 @@ func (r *postgresUserRepository) FindAll() ([]*user.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+
+	defer func() {
+		if cerr := rows.Close(); cerr != nil {
+			log.Printf("Error cerrando rows en FindAll: %v", cerr)
+		}
+	}()
 
 	var users []*user.User
 	for rows.Next() {
@@ -121,10 +146,22 @@ func (r *postgresUserRepository) FindAll() ([]*user.User, error) {
 		users = append(users, &u)
 	}
 
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
 	return users, nil
 }
 
-// Guardar un usuario nuevo
+// Save guarda un nuevo usuario en la base de datos.
+//
+// Parámetros:
+//
+//	u: Puntero al usuario a guardar.
+//
+// Retorna:
+//
+//	error: Error si falla la inserción.
 func (r *postgresUserRepository) Save(u *user.User) error {
 	query := `
 	INSERT INTO users (

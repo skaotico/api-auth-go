@@ -1,3 +1,11 @@
+// ============================================================
+// @file: authServiceInterface.go
+// @author: Yosemar Andrade
+// @created: 2025-11-20
+// @description: Interfaz del servicio de autenticación.
+// ============================================================
+
+// Package auth define las interfaces y DTOs del servicio de autenticación.
 package auth
 
 import (
@@ -5,8 +13,8 @@ import (
 	userRespServDto "api-auth/internal/service/auth/dto/response"
 )
 
-// AuthServiceInterface define los métodos que debe implementar el servicio de autenticación.
-type AuthServiceInterface interface {
+// ServiceInterface define los métodos que debe implementar el servicio de autenticación.
+type ServiceInterface interface {
 	// Login autentica a un usuario mediante email y contraseña.
 	//
 	// Parámetros:

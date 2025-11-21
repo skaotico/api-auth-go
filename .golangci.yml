@@ -1,0 +1,46 @@
+# ============================================================
+# GolangCI-Lint Configuration
+# @file: .golangci.yml
+# @author: Yosemar Andrade
+# @description: Configuración de linters para estandarizar la
+# calidad del código Go, detectando errores potenciales,
+# vulnerabilidades y malas prácticas en el proyecto.
+# ============================================================
+
+run:
+  # timeout define el tiempo máximo de ejecución del linter.
+  # Si el análisis tarda más que este valor, la ejecución se cancela.
+  timeout: 3m
+
+linters:
+  enable:
+    # govet realiza análisis estático avanzado para detectar
+    # construcciones sospechosas que podrían causar errores en tiempo
+    # de ejecución, como copia incorrecta de locks o uso indebido de printf.
+    - govet
+
+    # staticcheck detecta errores sutiles y complejos, prácticas obsoletas,
+    # posibles fugas de memoria y problemas de concurrencia.
+    - staticcheck
+
+    # revive provee reglas de estilo y calidad. Reemplaza golint
+    # permitiendo personalización y mejores sugerencias sobre cómo escribir
+    # código mantenible, idiomático y claro.
+    - revive
+
+    # errcheck obliga a comprobar los errores retornados por funciones.
+    # Ayuda a evitar pérdidas de errores silenciosos que pueden producir fallas
+    # inesperadas durante la ejecución.
+    - errcheck
+
+    # gosec revisa el código en busca de vulnerabilidades de seguridad,
+    # como inyecciones, manejo inseguro de credenciales, uso de algoritmos
+    # criptográficos débiles, problemas en concurrencia y más.
+    - gosec
+
+issues:
+  # exclude-use-default indica si se deben excluir automáticamente
+  # advertencias por defecto de linters. Mantenerlo en false asegura
+  # que no se descarte ningún posible problema a menos que sea explícitamente
+  # configurado.
+  exclude-use-default: false

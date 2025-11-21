@@ -1,11 +1,11 @@
 // ============================================================
-// @file: health_response.go
+// @file: healthResponse.go
 // @author: Yosemar Andrade
-// @date: 2025-11-19
-// @lastModified: 2025-11-19
+// @created: 2025-11-20
 // @description: Define la estructura de respuesta para el health check.
 // ============================================================
 
+// Package response contiene los DTOs de respuesta para el servicio de salud.
 package response
 
 import "time"

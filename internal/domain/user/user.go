@@ -1,7 +1,16 @@
+// ============================================================
+// @file: user.go
+// @author: Yosemar Andrade
+// @created: 2025-11-20
+// @description: Define la entidad User.
+// ============================================================
+
+// Package user define las entidades y reglas de negocio del dominio de usuario.
 package user
 
 import "time"
 
+// User representa un usuario del sistema.
 type User struct {
 	ID           int64      `json:"id"`
 	Username     string     `json:"username"`

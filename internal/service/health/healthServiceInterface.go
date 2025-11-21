@@ -1,18 +1,18 @@
 // ============================================================
-// @file: health_service_interface.go
+// @file: healthServiceInterface.go
 // @author: Yosemar Andrade
-// @date: 2025-11-19
-// @lastModified: 2025-11-19
+// @created: 2025-11-20
 // @description: Define la interfaz para el servicio de health check.
 // ============================================================
 
+// Package health define las interfaces y DTOs del servicio de salud.
 package health
 
 import "api-auth/internal/service/health/dto/response"
 
-// HealthServiceInterface representa la interfaz que define los métodos
+// ServiceInterface representa la interfaz que define los métodos
 // que un servicio de health check debe implementar.
-type HealthServiceInterface interface {
+type ServiceInterface interface {
 	// HealthCheck obtiene el estado de salud del servicio.
 	//
 	// Parámetros:

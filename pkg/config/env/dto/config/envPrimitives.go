@@ -1,7 +1,16 @@
+// ============================================================
+// @file: envPrimitives.go
+// @author: Yosemar Andrade
+// @created: 2025-11-20
+// @description: Definición de la estructura de configuración de variables de entorno.
+// ============================================================
+
+// Package config define las estructuras de configuración.
 package config
 
 import "time"
 
+// Config define la estructura de configuración de la aplicación.
 type Config struct {
 	// AppPort es el puerto donde correrá el servidor HTTP.
 	// Ejemplo: ":8080".

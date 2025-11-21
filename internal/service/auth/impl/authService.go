@@ -1,17 +1,17 @@
 // ============================================================
-// @file: auth_service.go
+// @file: authService.go
 // @author: Yosemar Andrade
-// @date: 2025-11-19
-// @lastModified: 2025-11-19
+// @created: 2025-11-20
 // @description: Implementa el servicio de autenticación con login y generación de JWT.
 // ============================================================
 
+// Package impl implementa la lógica de negocio del servicio de autenticación.
 package impl
 
 import (
 	domain "api-auth/internal/domain/user"
 	mapper "api-auth/internal/mapper/user"
-	repo "api-auth/internal/repository/auth"
+	authRepo "api-auth/internal/repository/auth"
 	loginServiceDto "api-auth/internal/service/auth/dto"
 	"api-auth/internal/service/auth/dto/config"
 	userRespServDto "api-auth/internal/service/auth/dto/response"
@@ -26,8 +26,8 @@ import (
 // AuthService representa el servicio de autenticación responsable de
 // manejar login de usuarios y generación de tokens JWT.
 type AuthService struct {
-	repo      repo.AuthRepository
-	usService userService.UserServiceInterface
+	repo      authRepo.Repository
+	usService userService.ServiceInterface
 	jwtConfig config.JWTConfig
 }
 
@@ -42,7 +42,7 @@ type AuthService struct {
 // Retorna:
 //
 //	*AuthService: puntero a la nueva instancia de AuthService
-func NewAuthService(r repo.AuthRepository, us userService.UserServiceInterface, jwtConfig config.JWTConfig) *AuthService {
+func NewAuthService(r authRepo.Repository, us userService.ServiceInterface, jwtConfig config.JWTConfig) *AuthService {
 	return &AuthService{
 		repo:      r,
 		usService: us,

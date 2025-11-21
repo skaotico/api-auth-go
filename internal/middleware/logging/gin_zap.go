@@ -1,3 +1,11 @@
+// ============================================================
+// @file: gin_zap.go
+// @author: Yosemar Andrade
+// @created: 2025-11-20
+// @description: Middleware de logging HTTP para Gin utilizando Uber Zap.
+// ============================================================
+
+// Package logging contiene los middlewares de logging.
 package logging
 
 import (
@@ -7,6 +15,22 @@ import (
 	"go.uber.org/zap"
 )
 
+// GinZap crea un middleware para Gin que registra información de cada
+// solicitud HTTP utilizando el logger Zap proporcionado.
+//
+// El registro incluye:
+//   - Método HTTP utilizado.
+//   - Ruta solicitada.
+//   - Código de estado HTTP.
+//   - Tiempo de latencia.
+//   - IP del cliente.
+//   - User-Agent.
+//
+// Parámetros:
+//   - logger: Instancia de zap.Logger utilizada para registrar los eventos.
+//
+// Retorna:
+//   - gin.HandlerFunc: Middleware que puede ser agregado al router de Gin.
 func GinZap(logger *zap.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		inicio := time.Now()
