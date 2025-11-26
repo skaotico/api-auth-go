@@ -9,6 +9,7 @@ import (
 	userRepository "api-auth/internal/repository/user"
 	jwtConfig "api-auth/internal/service/auth/dto/config"
 	authService "api-auth/internal/service/auth/impl"
+	cache "api-auth/internal/service/cache/impl"
 	userService "api-auth/internal/service/user/impl"
 	envPrimitivos "api-auth/pkg/config/env/dto/config"
 	platform "api-auth/pkg/platform/bd"
@@ -54,7 +55,9 @@ func NewApp(logger *zap.Logger, configEnv *envPrimitivos.Config) *App {
 		RefreshTTL: configEnv.JWTRefreshTTL,
 	}
 
-	serviceAuth := authService.NewAuthService(authRepo, serviceUser, envJwtConfig)
+	cacheService := cache.NewCacheService()
+
+	serviceAuth := authService.NewAuthService(authRepo, serviceUser, envJwtConfig, cacheService)
 	handlerAuth := authHandler.NewAuthHandler(serviceAuth)
 
 	// -------------------------------

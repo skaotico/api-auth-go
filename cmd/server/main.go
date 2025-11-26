@@ -16,6 +16,7 @@ import (
 	"api-auth/pkg/config/env"
 	"api-auth/pkg/logger"
 	config "api-auth/pkg/platform/bd"
+	"api-auth/pkg/platform/redis"
 
 	domain "api-auth/internal/domain/user"
 
@@ -71,6 +72,12 @@ func main() {
 	}
 
 	logger.Log.Info("Conexión a la base de datos establecida")
+
+	// Conectar a Redis
+	if err := redis.ConnectRedis(); err != nil {
+		logger.Log.Fatal("Error conectando a Redis", zap.Error(err))
+	}
+	logger.Log.Info("Conexión a Redis establecida")
 
 	// Crear la instancia principal (inyectando logger)
 	application := app.NewApp(logger.Log, appConfig)
