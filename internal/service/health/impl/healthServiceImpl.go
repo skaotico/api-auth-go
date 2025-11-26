@@ -1,23 +1,24 @@
 package impl
 
 import (
+	"api-auth/internal/service/health"
 	"api-auth/internal/service/health/dto/config"
 	"api-auth/internal/service/health/dto/response"
 	db "api-auth/pkg/platform/bd"
 	"time"
 )
 
-type HealthService struct {
+type HealthServiceImpl struct {
 	healthConfig config.HealthConfig
 }
 
-func NewHealthService(healthConfig config.HealthConfig) *HealthService {
-	return &HealthService{
+func NewHealthService(healthConfig config.HealthConfig) health.HealthService {
+	return &HealthServiceImpl{
 		healthConfig: healthConfig,
 	}
 }
 
-func (hs *HealthService) HealthCheck() response.HealthResponse {
+func (hs *HealthServiceImpl) HealthCheck() response.HealthResponse {
 
 	dbStatus := "CONNECTED"
 	if err := db.CheckDB(); err != nil {

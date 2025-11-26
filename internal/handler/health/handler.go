@@ -7,10 +7,10 @@ import (
 )
 
 type HealtHandler struct {
-	service service.HealthServiceInterface
+	service service.HealthService
 }
 
-func NewHealthHandler(s service.HealthServiceInterface) *HealtHandler {
+func NewHealthHandler(s service.HealthService) *HealtHandler {
 	return &HealtHandler{service: s}
 }
 

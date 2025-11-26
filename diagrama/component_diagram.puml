@@ -1,0 +1,45 @@
+@startuml
+title Component Diagram - Architecture Overview
+
+package "API Gateway / HTTP Layer" {
+    [Gin Router] as Router
+    [Auth Middleware] as AuthMW
+}
+
+package "Application Logic" {
+    component "Auth Module" {
+        [Auth Handler] as AuthH
+        [Auth Service] as AuthS
+    }
+    
+    component "User Module" {
+        [User Handler] as UserH
+        [User Service] as UserS
+    }
+}
+
+package "Data Access Layer" {
+    [User Repository] as UserRepo
+    [Cache Service] as CacheS
+}
+
+database "PostgreSQL" as DB
+database "Redis" as CacheDB
+
+Router --> AuthMW
+AuthMW --> AuthH : Protects Routes
+
+Router --> AuthH : /auth/*
+Router --> UserH : /users/*
+
+AuthH --> AuthS
+UserH --> UserS
+
+AuthS --> UserS : Validates User
+AuthS --> CacheS : Manages Tokens
+UserS --> UserRepo : CRUD Operations
+
+UserRepo --> DB : SQL Queries
+CacheS --> CacheDB : Set/Get Keys
+
+@enduml

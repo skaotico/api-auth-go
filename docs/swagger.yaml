@@ -1,3 +1,4 @@
+basePath: /
 definitions:
   request.LoginRequestDto:
     properties:
@@ -9,8 +10,39 @@ definitions:
     - email
     - password
     type: object
+  response.UserServiceResponseDto:
+    properties:
+      address_line:
+        type: string
+      country_id:
+        type: integer
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      phone:
+        type: string
+      token:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:8080
 info:
-  contact: {}
+  contact:
+    email: support@example.com
+    name: API Support
+  description: Servicio de autenticación y gestión de usuarios.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: API Auth Service
+  version: "1.0"
 paths:
   /v1/auth/login:
     post:
@@ -42,4 +74,27 @@ paths:
       summary: Iniciar sesión de usuario
       tags:
       - Auth
+  /v1/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Renueva el token de acceso y el refresh token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.UserServiceResponseDto'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Renovar token de acceso
+      tags:
+      - Auth
+schemes:
+- http
 swagger: "2.0"

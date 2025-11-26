@@ -1,7 +1,16 @@
+// ============================================================
+// @file: user.go
+// @author: Yosemar Andrade
+// @date: 2025-11-26
+// @lastModified: 2025-11-26
+// @description: Define la entidad User y sus propiedades.
+// ============================================================
+
 package user
 
 import "time"
 
+// User representa la entidad de usuario en el sistema.
 type User struct {
 	ID           int        `json:"id"`
 	Username     string     `json:"username"`

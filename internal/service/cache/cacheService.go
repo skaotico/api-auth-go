@@ -2,6 +2,7 @@ package cache
 
 import (
 	authDomain "api-auth/internal/domain/auth"
+	"api-auth/internal/domain/security"
 	"context"
 	"time"
 )
@@ -26,7 +27,7 @@ type CacheService interface {
 		refresh string,
 		jwtData *authDomain.JwtData,
 		refreshData *authDomain.RefreshData,
-		jwtTTL time.Duration,
+		jwtTTLww time.Duration,
 		refreshTTL time.Duration,
 	) error
 
@@ -41,4 +42,14 @@ type CacheService interface {
 
 	// DeleteAll elimina JWT, Refresh y UserIndex asociados a un usuario.
 	DeleteAll(ctx context.Context, userId string, jwt string, refresh string) error
+
+	// ============================================================
+	// Rate Limit
+	// ============================================================
+
+	// SaveRateLimit guarda un registro de rate limiting en Redis.
+	SaveRateLimit(ctx context.Context, data *security.RateLimitData) error
+
+	// GetRateLimit obtiene un registro de rate limiting desde Redis.
+	GetRateLimit(ctx context.Context, key string) (*security.RateLimitData, error)
 }

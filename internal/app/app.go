@@ -1,3 +1,11 @@
+// ============================================================
+// @file: app.go
+// @author: Yosemar Andrade
+// @date: 2025-11-18
+// @lastModified: 2025-11-26
+// @description: Configuración principal de la aplicación, inyección de dependencias y rutas.
+// ============================================================
+
 package app
 
 import (
@@ -5,15 +13,18 @@ import (
 	userHandler "api-auth/internal/handler/user"
 	"api-auth/internal/middleware/logging"
 	"api-auth/internal/middleware/response"
+	middleware "api-auth/internal/middleware/security"
 	authRepository "api-auth/internal/repository/auth"
 	userRepository "api-auth/internal/repository/user"
 	jwtConfig "api-auth/internal/service/auth/dto/config"
 	authService "api-auth/internal/service/auth/impl"
-	cache "api-auth/internal/service/cache/impl"
+	"api-auth/internal/service/cache"
+	cacheImpl "api-auth/internal/service/cache/impl"
+	healthService "api-auth/internal/service/health"
+	healthConfig "api-auth/internal/service/health/dto/config"
+	healthServiceImpl "api-auth/internal/service/health/impl"
 	userService "api-auth/internal/service/user/impl"
 	envPrimitivos "api-auth/pkg/config/env/dto/config"
-	platform "api-auth/pkg/platform/bd"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -28,6 +39,13 @@ type App struct {
 }
 
 // NewApp inicializa la app con router, middlewares y dependencias
+//
+// Parámetros:
+//   - logger: instancia de zap.Logger.
+//   - configEnv: configuración cargada desde variables de entorno.
+//
+// Retorna:
+//   - *App: instancia de la aplicación.
 func NewApp(logger *zap.Logger, configEnv *envPrimitivos.Config) *App {
 	router := gin.New()
 	router.Use(gin.Recovery())
@@ -43,8 +61,8 @@ func NewApp(logger *zap.Logger, configEnv *envPrimitivos.Config) *App {
 
 	// USER
 	repoUser := userRepository.NewUserRepository()
-	serviceUser := userService.NewUserService(repoUser)
-	// handlerUser := userHandler.NewUserHandler(serviceUser)
+	serviceUser := userService.NewUserService(repoUser, logger)
+	handlerUser := userHandler.NewUserHandler(serviceUser)
 
 	// AUTH
 	authRepo := authRepository.NewAuthRepository()
@@ -55,15 +73,24 @@ func NewApp(logger *zap.Logger, configEnv *envPrimitivos.Config) *App {
 		RefreshTTL: configEnv.JWTRefreshTTL,
 	}
 
-	cacheService := cache.NewCacheService()
+	cacheService := cacheImpl.NewCacheService(logger)
 
-	serviceAuth := authService.NewAuthService(authRepo, serviceUser, envJwtConfig, cacheService)
+	serviceAuth := authService.NewAuthService(authRepo, serviceUser, envJwtConfig, cacheService, logger)
 	handlerAuth := authHandler.NewAuthHandler(serviceAuth)
+
+	// HEALTH
+	envHealthConfig := healthConfig.HealthConfig{
+		Status:      "UP",
+		Version:     configEnv.Version,
+		Environment: configEnv.Environment,
+		ServiceName: "api-auth",
+	}
+	serviceHealth := healthServiceImpl.NewHealthService(envHealthConfig)
 
 	// -------------------------------
 	// Setup de rutas
 	// -------------------------------
-	setupV1Routes(router, nil, handlerAuth, configEnv.Version, configEnv.Environment)
+	setupV1Routes(router, handlerUser, handlerAuth, serviceHealth, cacheService)
 
 	return &App{
 		Router: router,
@@ -72,36 +99,33 @@ func NewApp(logger *zap.Logger, configEnv *envPrimitivos.Config) *App {
 }
 
 // setupV1Routes registra todas las rutas de la versión 1
-func setupV1Routes(router *gin.Engine, userHandler *userHandler.UserHandler, authHandler *authHandler.AuthHandler, version string, environment string) {
+func setupV1Routes(router *gin.Engine, userHandler *userHandler.UserHandler, authHandler *authHandler.AuthHandler, healthService healthService.HealthService, cacheService cache.CacheService) {
 	v1 := router.Group("/v1")
 	{
-		dbStatus := "OK"
-		if err := platform.CheckDB(); err != nil {
-			dbStatus = "DOWN"
-		}
-
+		// Health Check
 		v1.GET("/health", func(c *gin.Context) {
 			c.Header("Cache-Control", "no-store")
-			c.JSON(200, gin.H{
-				"status":    "UP",
-				"service":   "api-auth",
-				"env":       environment,
-				"version":   version,
-				"time":      time.Now().Format(time.RFC3339),
-				"status_db": dbStatus,
-			})
+			resp := healthService.HealthCheck()
+			c.JSON(200, resp)
 		})
 
 		// Users
-		// v1.GET("/users", userHandler.GetUsers)
-		// v1.POST("/users", userHandler.CreateUser)
+		v1.GET("/users", userHandler.GetUsers)
+		v1.POST("/users", userHandler.CreateUser)
 
 		// Auth
-		v1.POST("/auth/login", authHandler.Login)
+		v1.POST("/auth/login", middleware.RateLimitLogin(cacheService), authHandler.Login)
+		v1.POST("/auth/refresh", authHandler.RefreshToken)
 	}
 }
 
 // Run inicia el servidor en el puerto especificado
+//
+// Parámetros:
+//   - port: puerto en el que escuchará el servidor (ej. ":8080").
+//
+// Retorna:
+//   - error: si falla el inicio del servidor.
 func (a *App) Run(port string) error {
 	return a.Router.Run(port)
 }

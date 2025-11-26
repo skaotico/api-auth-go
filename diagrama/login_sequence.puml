@@ -1,0 +1,67 @@
+@startuml
+title Login Process (Complete Flow)
+autonumber
+
+actor "Client" as User
+participant "AuthHandler" as Handler
+participant "AuthService" as AuthService
+participant "UserService" as UserService
+participant "UserRepository" as UserRepo
+participant "CacheService" as Cache
+participant "Redis" as Redis
+
+User -> Handler: POST /login (email, password)
+activate Handler
+
+    Handler -> AuthService: Login(loginDto)
+    activate AuthService
+
+        AuthService -> UserService: GetUserByEmail(email)
+        activate UserService
+            UserService -> UserRepo: FindByEmail(email)
+            activate UserRepo
+            
+            alt User Not Found
+                UserRepo --> UserService: Error (User Not Found)
+                UserService --> AuthService: Error (User Not Found)
+                AuthService --> Handler: Error (User Not Found)
+                Handler --> User: 401 Unauthorized
+            else User Found
+                UserRepo --> UserService: User Entity
+                deactivate UserRepo
+                UserService --> AuthService: User Entity
+            end
+        deactivate UserService
+
+        AuthService -> AuthService: CompareHashAndPassword()
+        alt Password Incorrect
+            AuthService --> Handler: Error (Invalid Password)
+            Handler --> User: 401 Unauthorized
+        end
+        
+        note right of AuthService: Generación de Tokens (JTI, Claims)
+
+        AuthService -> Cache: SaveTokens(jwt, refresh, jwtData, refreshData)
+        activate Cache
+            Cache -> Redis: Set(jwtKey, jwtData)
+            Cache -> Redis: Set(refreshKey, refreshData)
+            Cache -> Redis: Set(userIndexKey, userIndex)
+            
+            alt Redis Error
+                Redis --> Cache: Error
+                Cache --> AuthService: Error
+                AuthService --> Handler: Error (Internal Server Error)
+                Handler --> User: 500 Internal Server Error
+            else Success
+                Cache --> AuthService: nil (Success)
+            end
+        deactivate Cache
+
+    AuthService --> Handler: UserResponseDto, RefreshTokenString
+    deactivate AuthService
+
+    Handler -> Handler: http.SetCookie(refresh_token)
+    Handler --> User: 200 OK (UserResponseDto)
+
+deactivate Handler
+@enduml

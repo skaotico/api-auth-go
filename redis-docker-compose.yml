@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: redis_dev
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis_conf:/usr/local/etc/redis
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]

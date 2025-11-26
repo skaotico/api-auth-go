@@ -1,0 +1,87 @@
+@startuml
+title Refresh Token Process (Complete Flow)
+autonumber
+
+actor "Client" as User
+participant "AuthHandler" as Handler
+participant "AuthService" as AuthService
+participant "CacheService" as Cache
+participant "UserService" as UserService
+participant "UserRepository" as UserRepo
+
+User -> Handler: POST /refresh (Cookie: refresh_token)
+activate Handler
+
+    alt Cookie Missing
+        Handler --> User: 401 Unauthorized (Refresh token not found)
+    end
+
+    Handler -> AuthService: RefreshToken(oldRefreshToken)
+    activate AuthService
+
+        group Validación
+            AuthService -> Cache: GetRefreshData(oldRefreshToken)
+            activate Cache
+            
+            alt Token Not Found / Expired
+                Cache --> AuthService: Error
+                AuthService --> Handler: Error (Invalid Token)
+                Handler --> User: 401 Unauthorized
+            else Token Found
+                Cache --> AuthService: RefreshData
+            end
+            deactivate Cache
+
+            AuthService -> UserService: GetUserByID(userId)
+            activate UserService
+                UserService -> UserRepo: FindByID(id)
+                activate UserRepo
+                
+                alt User Not Found
+                    UserRepo --> UserService: Error
+                    UserService --> AuthService: Error
+                    AuthService --> Handler: Error (User Not Found)
+                    Handler --> User: 401 Unauthorized
+                else User Found
+                    UserRepo --> UserService: User Entity
+                    UserService --> AuthService: User Entity
+                end
+                deactivate UserRepo
+            deactivate UserService
+        end
+
+        group Token Rotation Check (Security)
+            AuthService -> Cache: GetUserIndex(userId)
+            activate Cache
+            Cache --> AuthService: UserIndex
+            deactivate Cache
+            
+            alt Token Reuse Detected (ActiveRefresh != oldRefreshToken)
+                AuthService -> AuthService: Log Warning (Possible Theft)
+                AuthService --> Handler: Error (Invalid Token)
+                Handler --> User: 401 Unauthorized
+            end
+        end
+
+        note right of AuthService: Generación de NUEVOS Tokens
+
+        AuthService -> Cache: SaveTokens(newJwt, newRefresh, newData...)
+        activate Cache
+        
+        alt Redis Error
+            Cache --> AuthService: Error
+            AuthService --> Handler: Error (Internal Server Error)
+            Handler --> User: 500 Internal Server Error
+        else Success
+            Cache --> AuthService: nil (Success)
+        end
+        deactivate Cache
+
+    AuthService --> Handler: UserResponseDto, NewRefreshTokenString
+    deactivate AuthService
+
+    Handler -> Handler: http.SetCookie(new_refresh_token)
+    Handler --> User: 200 OK (UserResponseDto)
+
+deactivate Handler
+@enduml
