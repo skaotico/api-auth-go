@@ -61,7 +61,9 @@ var _ = reqAut.LoginRequestDto{}
 func main() {
 	// Inicializar logger
 	logger.Init()
-	defer logger.Log.Sync()
+	defer func() {
+		_ = logger.Log.Sync()
+	}()
 
 	// Cargar configuración desde variables de entorno
 	appConfig := env.Load()

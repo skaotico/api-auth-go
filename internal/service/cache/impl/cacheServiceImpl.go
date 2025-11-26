@@ -117,7 +117,11 @@ func (s *CacheServiceImpl) GetJwtData(ctx context.Context, jwt string) (*auth.Jw
 	}
 
 	var data auth.JwtData
-	json.Unmarshal([]byte(val), &data)
+	err = json.Unmarshal([]byte(val), &data)
+	if err != nil {
+		s.log.Error("Error deserializando JWT", zap.Error(err), zap.String("jwt", jwt))
+		return nil, err
+	}
 
 	s.log.Debug("JWT obtenido correctamente", zap.String("jwt", jwt))
 	return &data, nil
@@ -134,7 +138,11 @@ func (s *CacheServiceImpl) GetRefreshData(ctx context.Context, refresh string) (
 	}
 
 	var data auth.RefreshData
-	json.Unmarshal([]byte(val), &data)
+	err = json.Unmarshal([]byte(val), &data)
+	if err != nil {
+		s.log.Error("Error deserializando Refresh", zap.Error(err), zap.String("refresh", refresh))
+		return nil, err
+	}
 
 	s.log.Info("Refresh obtenido correctamente", zap.String("refresh", refresh))
 	return &data, nil
@@ -151,7 +159,11 @@ func (s *CacheServiceImpl) GetUserIndex(ctx context.Context, userId string) (*au
 	}
 
 	var data auth.UserIndex
-	json.Unmarshal([]byte(val), &data)
+	err = json.Unmarshal([]byte(val), &data)
+	if err != nil {
+		s.log.Error("Error deserializando UserIndex", zap.Error(err), zap.String("userId", userId))
+		return nil, err
+	}
 
 	s.log.Debug("Índice del usuario obtenido correctamente", zap.String("userId", userId))
 	return &data, nil
@@ -219,7 +231,11 @@ func (s *CacheServiceImpl) GetRateLimit(ctx context.Context, key string) (*secur
 	}
 
 	var data security.RateLimitData
-	json.Unmarshal([]byte(val), &data)
+	err = json.Unmarshal([]byte(val), &data)
+	if err != nil {
+		s.log.Error("Error deserializando RateLimit", zap.Error(err), zap.String("key", key))
+		return nil, err
+	}
 
 	s.log.Debug("RateLimit obtenido correctamente", zap.String("key", key))
 	return &data, nil
