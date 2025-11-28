@@ -1,8 +1,8 @@
 // ============================================================
-// @file: env.go
+// @file: envConfig.go
 // @author: Yosemar Andrade
-// @date: 2025-11-19
-// @lastModified: 2025-11-19
+// @date: 2025-11-26
+// @lastModified: 2025-11-26
 // @description: Módulo responsable de cargar, validar y mapear
 // variables de entorno en la estructura de configuración del
 // proyecto, priorizando variables del sistema y aplicando reglas
@@ -13,10 +13,11 @@ package env
 
 import (
 	envPrimitivos "api-auth/pkg/config/env/dto/config"
-	"log"
+	"api-auth/pkg/logger"
 
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
+	"go.uber.org/zap"
 )
 
 // Load carga la configuración leyendo las variables de entorno.
@@ -29,12 +30,12 @@ import (
 //   - *Config: estructura completamente cargada y validada.
 //
 // Errores:
-//   - Finaliza la ejecución utilizando log.Fatalf si faltan variables
+//   - Finaliza la ejecución utilizando logger.Log.Fatal si faltan variables
 //     obligatorias o existe algún error crítico en el mapeo.
 func Load() *envPrimitivos.Config {
 	// Paso 1: Intentar cargar .env (solo para desarrollo/local).
 	if err := godotenv.Load("../../.env"); err != nil {
-		log.Println("Advertencia: No se encontró el archivo .env, usando variables de entorno del sistema.")
+		logger.Log.Warn("Advertencia: No se encontró el archivo .env, usando variables de entorno del sistema.")
 	}
 
 	var cfg envPrimitivos.Config
@@ -42,11 +43,11 @@ func Load() *envPrimitivos.Config {
 	// Paso 2: Mapear y validar variables de entorno a la estructura Config.
 	err := envconfig.Process("", &cfg)
 	if err != nil {
-		log.Fatalf("Error crítico al cargar la configuración: %v", err)
+		logger.Log.Fatal("Error crítico al cargar la configuración", zap.Error(err))
 	}
 
 	// Loggear el entorno cargado para depuración.
-	log.Printf("Configuración cargada. Entorno: %s", cfg.Environment)
+	logger.Log.Info("Configuración cargada", zap.String("environment", cfg.Environment))
 
 	return &cfg
 }

@@ -10,6 +10,6 @@ type CreateUserRequest struct {
 	Password    string     `json:"password" binding:"required" example:"secret123"`
 	Phone       string     `json:"phone" example:"+56912345678"`
 	BirthDate   *time.Time `json:"birth_date,omitempty" example:"1990-01-01T00:00:00Z"`
-	CountryID   int32      `json:"country_id" example:"56"`
+	CountryID   int        `json:"country_id" example:"56"`
 	AddressLine string     `json:"address_line" example:"Calle Falsa 123"`
 }

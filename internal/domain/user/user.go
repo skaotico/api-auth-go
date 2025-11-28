@@ -1,9 +1,18 @@
+// ============================================================
+// @file: user.go
+// @author: Yosemar Andrade
+// @date: 2025-11-26
+// @lastModified: 2025-11-26
+// @description: Define la entidad User y sus propiedades.
+// ============================================================
+
 package user
 
 import "time"
 
+// User representa la entidad de usuario en el sistema.
 type User struct {
-	ID           int64      `json:"id"`
+	ID           int        `json:"id"`
 	Username     string     `json:"username"`
 	Email        string     `json:"email"`
 	PasswordHash string     `json:"-"` // No se expone en JSON
@@ -13,7 +22,7 @@ type User struct {
 	BirthDate    *time.Time `json:"birth_date,omitempty"`
 	IsActive     bool       `json:"is_active"`
 
-	CountryID   int32   `json:"country_id"`
+	CountryID   int     `json:"country_id"`
 	AddressLine *string `json:"address_line,omitempty"`
 
 	CreatedAt time.Time  `json:"created_at"`

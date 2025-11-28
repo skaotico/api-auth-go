@@ -1,0 +1,94 @@
+@startuml
+title Class Diagram - Auth & User Modules
+
+package "Handler Layer" {
+    class AuthHandler {
+        - service: AuthServiceInterface
+        + Login(c: gin.Context)
+        + RefreshToken(c: gin.Context)
+    }
+
+    class UserHandler {
+        - service: UserService
+        + GetUsers(c: gin.Context)
+        + CreateUser(c: gin.Context)
+    }
+}
+
+package "Service Layer" {
+    interface AuthServiceInterface {
+        + Login(loginDto): UserResponse, string, error
+        + RefreshToken(token): UserResponse, string, error
+    }
+
+    class AuthService {
+        - repo: AuthRepository
+        - usService: UserService
+        - jwtConfig: JWTConfig
+        - cacheService: CacheService
+        + Login(...)
+        + RefreshToken(...)
+    }
+
+    interface UserService {
+        + GetAllUsers(): []User, error
+        + GetUserByEmail(email): User, error
+        + GetUserByID(id): User, error
+        + CreateUser(user, password): error
+    }
+
+    class UserServiceImpl {
+        - repo: UserRepository
+        + GetAllUsers()
+        + GetUserByEmail()
+        + GetUserByID()
+        + CreateUser()
+    }
+
+    interface CacheService {
+        + SaveTokens(...)
+        + GetRefreshData(...)
+        + GetUserIndex(...)
+    }
+}
+
+package "Repository Layer" {
+    interface UserRepository {
+        + FindByEmail(email): User, error
+        + FindByID(id): User, error
+        + FindAll(): []User, error
+        + Save(user): error
+    }
+
+    class PostgresUserRepository {
+        - db: sql.DB
+    }
+}
+
+package "Domain" {
+    class User {
+        + ID: int
+        + Email: string
+        + PasswordHash: string
+        + ...
+    }
+}
+
+AuthHandler --> AuthServiceInterface
+UserHandler --> UserService
+
+AuthService ..|> AuthServiceInterface
+UserServiceImpl ..|> UserService
+
+AuthService --> UserService : uses
+AuthService --> CacheService : uses
+AuthService --> UserRepository : uses (via AuthRepo)
+
+UserServiceImpl --> UserRepository
+
+PostgresUserRepository ..|> UserRepository
+
+UserServiceImpl ..> User : manages
+PostgresUserRepository ..> User : returns
+
+@enduml

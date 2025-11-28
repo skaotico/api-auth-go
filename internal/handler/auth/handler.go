@@ -67,7 +67,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		Password: req.Password,
 	}
 
-	userResp, err := h.service.Login(loginDto)
+	userResp, refreshToken, err := h.service.Login(loginDto)
 	if err != nil {
 		c.Set("response_error", map[string]interface{}{
 			"message":   err.Error(),
@@ -77,7 +77,61 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		c.Abort()
 		return
 	}
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    refreshToken,
+		Path:     "/",
+		MaxAge:   3600 * 24 * 30,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+	})
 
 	// Guardamos el response para que el middleware lo envuelva
+	c.Set("response", userResp)
+}
+
+// RefreshToken renueva el token de acceso usando el refresh token de la cookie.
+// @Summary Renovar token de acceso
+// @Description Renueva el token de acceso y el refresh token
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Success 200 {object} response.UserServiceResponseDto
+// @Failure 401 {object} map[string]string
+// @Router /v1/auth/refresh [post]
+func (h *AuthHandler) RefreshToken(c *gin.Context) {
+	refreshToken, err := c.Cookie("refresh_token")
+	if err != nil {
+		c.Set("response_error", map[string]interface{}{
+			"message":   "Refresh token no encontrado",
+			"errorCode": strconv.Itoa(http.StatusUnauthorized),
+			"httpCode":  http.StatusUnauthorized,
+		})
+		c.Abort()
+		return
+	}
+
+	userResp, newRefreshToken, err := h.service.RefreshToken(refreshToken)
+	if err != nil {
+		c.Set("response_error", map[string]interface{}{
+			"message":   err.Error(),
+			"errorCode": strconv.Itoa(http.StatusUnauthorized),
+			"httpCode":  http.StatusUnauthorized,
+		})
+		c.Abort()
+		return
+	}
+
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    newRefreshToken,
+		Path:     "/",
+		MaxAge:   3600 * 24 * 30,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+	})
+
 	c.Set("response", userResp)
 }
